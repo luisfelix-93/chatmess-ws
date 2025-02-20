@@ -1,7 +1,7 @@
 import MessageDTO from "../infrastructure/models/DTO/MessageDTO";
 import IUserService from "../services/UserService";
 import IMessageService from "../services/MessageService";
-import formatMessage from "../infrastructure/utils/FormattMessage";
+import formatMessage from "../infrastructure/utils/FormatMessage";
 import Message from "../infrastructure/models/entities/Message";
 import User from "../infrastructure/models/entities/User";
 
