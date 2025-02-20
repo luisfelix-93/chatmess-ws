@@ -3,11 +3,12 @@ import IUserService from "../services/UserService";
 import IMessageService from "../services/MessageService";
 import formatMessage from "../infrastructure/utils/FormattMessage";
 import Message from "../infrastructure/models/entities/Message";
+import User from "../infrastructure/models/entities/User";
 
 export default interface IChatController {
-    onJoinRoom(socket: any, io: any, username: string, room: string): Promise<void>;
-    onChatMessage(socket: any, io: any, pMessage: MessageDTO): Promise<void>;
-    onDisconect(socket: any, io: any): Promise<void>;
+    onJoinRoom(socket: any, io: any, username: string, room: string): Promise<void | null>;
+    onChatMessage(socket: any, io: any, pMessage: MessageDTO): Promise<void | null>;
+    onDisconect(socket: any, io: any): Promise<User | null>;
 }
 
 export default class ChatController implements IChatController {
@@ -103,14 +104,17 @@ export default class ChatController implements IChatController {
      * @param socket 
      * @param io 
      */
-    async onDisconect(socket: any, io: any): Promise<void> {
+    async onDisconect(socket: any, io: any): Promise<User | null> {
         try {
             const user = await this.userService.getCurrentUser(socket.id);
-                if (user) {
-                    // Messagem para os membros da sala
-                    const message: MessageDTO = {
+                if (!user) {
+                    return null;
+                }
+                // Mensagem para os membros da sala
+                const message : MessageDTO = {
                     username: "ChatMess Bot",
-                    text: `${user.username} deixou o chat`
+                    room: user.room,
+                    text: `${user.username} deixou a sala`
                 }
                 io.to(user.room).emit("message", formatMessage(message));
                 io.to(user.room).emit("roomUsers", {
@@ -119,9 +123,10 @@ export default class ChatController implements IChatController {
             });
 
             await this.userService.userLeave(socket.id)
-        }
+            return user;
         } catch (error) {
             console.error(error);
+            return null;
         }
     }
 }
