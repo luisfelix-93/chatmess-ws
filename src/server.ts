@@ -1,5 +1,5 @@
-import path from "path";
-import http from "http";
+import * as path from "path";
+import * as http from "http";
 import * as express from "express";
 import { Server} from "socket.io";
 import IChatController  from "./controllers/ChatController";

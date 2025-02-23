@@ -1,5 +1,5 @@
 export default class MessageDTO {
-    username: string;
+    username?: string;
     room?: string;
-    text: string;
+    text?: string;
 }

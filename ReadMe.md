@@ -51,12 +51,13 @@ npm run dev
 │   └── MessageService.ts
 ├── infrastructure/ # Camada de infraestrutura
 │   ├── models/
-│   │   ├── DTO/           # Objetos de transferência
+│   │   ├── DTO/ # Objetos de transferência
+│           └── MessageDTO.ts # DTO relacionado a m          
 │   │   └── entities/      # Entidades de domínio
 │   └── utils/             # Utilitários
 ├── managers/       # Gerenciadores de recursos
 │   └── SocketManager.ts
-└── app.ts          # Ponto de entrada
+└── server.ts          # Ponto de entrada
  ```
 
  ## 6. Diagrama de Fluxo
