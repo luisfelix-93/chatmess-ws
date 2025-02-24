@@ -13,7 +13,8 @@ export default interface IUserService {
 export default class UserService implements IUserService {
     constructor() {}
 
-    public async userJoin(username: string, socketId: string, room: string): Promise<object|null> {
+    public async userJoin(username: string, socketId: string, room: string): Promise<User|null> {
+        let user: User = new User();
         const body = JSON.stringify({username, socketId, room});
         const config  = {
             method: 'POST',
@@ -26,7 +27,8 @@ export default class UserService implements IUserService {
 
         try {
             const response = await axios.request(config);
-            return response.data.ObjectResult;
+            user = response.data.ObjectResult;
+            return user;
         } catch(error) {
             throw new Error("Erro ao inserir usuário no chat")
         }

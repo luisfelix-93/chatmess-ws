@@ -5,8 +5,8 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 export default interface IMessageService {
-    createMessage(pMessage: MessageDTO): Promise<object | null>;
-    findMessage(room: string): Promise<Message | null>;
+    createMessage(pMessage: MessageDTO): Promise<Message | null>;
+    findMessage(room: string): Promise<Message[] | null>;
     deleteMessage(messageid: string): Promise<string | null>;
     updateMessage(id: string, messageUpdate: MessageDTO): Promise<object | null>
 }
@@ -14,7 +14,7 @@ export default interface IMessageService {
 export default class MessageService implements IMessageService {
     constructor(){}
 
-    async createMessage(pMessage: MessageDTO): Promise<object | null> {
+    async createMessage(pMessage: MessageDTO): Promise<Message | null> {
         const body = JSON.stringify(pMessage);
         const config = {
             method: 'POST',
@@ -26,14 +26,15 @@ export default class MessageService implements IMessageService {
         return response.data.ResultObject;
     }
 
-    async findMessage(room: string): Promise<Message | null> {
-        let message: Message = new Message();
+    async findMessage(room: string): Promise<Message[] | null> {
+        let message: Message[] = [];
         const url = process.env.URL_MESSAGE;
         const config = {
             method: 'GET',
             url: `${url}/room/${room}`,
         }
-        const response = await axios.request(config) 
+        const response = await axios.request(config);
+        message = response.data.ResultObject;
         return message;
     }
 
