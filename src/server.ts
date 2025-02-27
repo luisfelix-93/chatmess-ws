@@ -9,6 +9,8 @@ import * as dotenv from "dotenv"
 import IUserService from "./services/UserService";
 import IMessageService from "./services/MessageService";
 import { SocketManager } from "./managers/SocketManager";
+import IUserRepository from "./infrastructure/repositories/UserRepository";
+import Redis from "ioredis";
 
 dotenv.config();
 
@@ -16,14 +18,31 @@ class App {
     private readonly app: express.Application;
     private readonly server: http.Server;
     private port: string | number;
+    private  redisClient: Redis;
 
     constructor() {
         this.app = express();
         this.server = http.createServer(this.app);
         this.port = process.env.PORT || 3000;
-
+        this.redisClient = this.configureRedis();
         this.configureMiddleware();
         this.configureStaticFiles();
+
+    }
+
+    
+    private configureRedis(): Redis {
+        const redis = new Redis({
+            host: process.env.REDIS_HOST || "localhost",
+            port: parseInt(process.env.REDIS_PORT) || 6379,
+            retryStrategy: (times) => Math.min(times * 100, 3000)
+        });
+
+        redis.on("connect", () => {
+            console.log("Conectado ao Redis");
+        });
+
+        return redis;
     }
 
     private configureMiddleware(): void {
@@ -36,7 +55,8 @@ class App {
     }
 
     public initializeSocket(io: Server): void {
-        const userService = new IUserService();
+        const userRepository = new IUserRepository();
+        const userService = new IUserService(userRepository);
         const messageService = new IMessageService();
 
         const chatController = new IChatController(userService, messageService);

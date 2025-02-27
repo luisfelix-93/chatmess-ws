@@ -33,8 +33,11 @@ export default class ChatController implements IChatController {
     async onJoinRoom(socket: any, io: any, username: string, room: string): Promise<void | null> {
         const socketId: string = socket.id;
         try {
-            const user = await this.userService.userJoin(username, socketId, room);
-            
+            // Inserir usuário no chat
+            await this.userService.userJoin(username, socketId, room);
+            // Fazer a busca desse usuário
+            const user = await this.userService.getCurrentUser(socketId);
+            // Verificar se o usuário foi encontrado
             if (!user) {
                 console.error("Não foi encontrado nenhum usuário");
                 return null;
