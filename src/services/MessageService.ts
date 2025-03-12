@@ -31,7 +31,7 @@ export default class MessageService implements IMessageService {
             httpsAgent
         }
         const response = await axios.request(config);
-        return response.data.ResultObject;
+        return response.data.resultObject;
     }
 
     async findMessage(room: string): Promise<Message[] | null> {
@@ -43,7 +43,7 @@ export default class MessageService implements IMessageService {
             httpsAgent
         }
         const response = await axios.request(config);
-        message = response.data.ResultObject;
+        message = response.data.resultObject;
         return message;
     }
 
@@ -55,7 +55,7 @@ export default class MessageService implements IMessageService {
             httpsAgent
         }
         const response = await axios.request(config);
-        return response.data.Message;
+        return response.data.message;
     }
 
     async updateMessage(id: string, messageUpdate: MessageDTO): Promise<object | null> {
@@ -69,6 +69,6 @@ export default class MessageService implements IMessageService {
             httpsAgent
         };
         const response = await axios.request(config);
-        return response.data.ResultObject;
+        return response.data.resultObject;
     }
 }
