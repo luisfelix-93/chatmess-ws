@@ -71,6 +71,7 @@ class ChatTester {
                 return;
             }
             this.socket.emit('chatMessage', {
+                username: this.config.username,
                 text: input,
                 room: this.config.room,
             });
