@@ -1,16 +1,16 @@
 import * as chalk from "chalk";
-import { resolve } from "path";
 import * as readline from "readline";
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 interface ClientConfig  {
-    username: string;
+    baseUsername: string;
     room: string;
     serverUrl: string;
 }
 
 class ChatTester {
-    private socket: any;
+    private socket!: Socket;
     private rl: readline.Interface;
+    private username!: string;
 
     constructor(private config: ClientConfig) {
         this.rl = readline.createInterface({
@@ -32,7 +32,9 @@ class ChatTester {
 
     private setupEventListeners(): void {
         this.socket.on('connect', () => {
-            console.log(chalk.green(`Connected to server (ID: ${this.socket.id})`));
+            // Gera o username único com o socket.id
+            this.username = `${this.config.baseUsername} - ${this.shortSocketId()}`;
+            console.log(chalk.green(`Connected as ${this.username} (ID: ${this.socket.id})`));
             this.joinRoom();
         });
 
@@ -57,8 +59,12 @@ class ChatTester {
         });
     }
 
+    private shortSocketId(): string {
+        return this.socket.id.slice(-4);
+    }
+
     private joinRoom(): void {
-        this.socket.emit('joinRoom', this.config.username, this.config.room);
+        this.socket.emit('joinRoom', this.username, this.config.room);
         console.log(chalk.blue('\n Joining room ' + this.config.room));
     }
 
@@ -71,7 +77,7 @@ class ChatTester {
                 return;
             }
             this.socket.emit('chatMessage', {
-                username: this.config.username,
+                username: this.username,
                 text: input,
                 room: this.config.room,
             });
@@ -93,8 +99,8 @@ class ChatTester {
 }
 
 const config : ClientConfig = {
-    username: 'TestUser',
-    room: 'teste_01',
+    baseUsername: 'TestUser',
+    room: 'teste_02',
     serverUrl: 'http://localhost:3000'
 }
 
