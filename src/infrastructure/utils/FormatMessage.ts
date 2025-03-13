@@ -1,4 +1,4 @@
-import moment from "moment";
+import * as moment from "moment";
 import MessageDTO from "../models/DTO/MessageDTO";
 import Message from "../models/entities/Message";
 

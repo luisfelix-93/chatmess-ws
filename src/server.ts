@@ -3,8 +3,6 @@ import * as http from "http";
 import * as express from "express";
 import { Server} from "socket.io";
 import IChatController  from "./controllers/ChatController";
-
-
 import * as dotenv from "dotenv"
 import IUserService from "./services/UserService";
 import IMessageService from "./services/MessageService";
@@ -19,15 +17,22 @@ class App {
     private readonly server: http.Server;
     private port: string | number;
     private  redisClient: Redis;
+    private readonly io: Server;
 
     constructor() {
         this.app = express();
         this.server = http.createServer(this.app);
+        this.io = new Server(this.server, {
+            cors: {
+                origin: '*',
+                methods: ['GET', 'POST']
+            }
+        });
         this.port = process.env.PORT || 3000;
         this.redisClient = this.configureRedis();
         this.configureMiddleware();
         this.configureStaticFiles();
-
+        this.initializeSocket();
     }
 
     
@@ -54,14 +59,12 @@ class App {
         this.app.use(express.static(path.join(__dirname, "public")));
     }
 
-    public initializeSocket(io: Server): void {
+    public initializeSocket(): void {
         const userRepository = new IUserRepository();
         const userService = new IUserService(userRepository);
         const messageService = new IMessageService();
-
         const chatController = new IChatController(userService, messageService);
-
-        new SocketManager(io, chatController);
+        new SocketManager(this.io, chatController);
     }
 
     public start(): void {
@@ -71,13 +74,5 @@ class App {
     }
 }
 
-const io = new Server(http.createServer(), {
-    cors: {
-        origin: '*',
-        methods: ["GET", "POST"]
-    }
-});
-
 const application = new App();
-application.initializeSocket(io);
 application.start();
