@@ -1,64 +1,67 @@
 name: Auto PR on Push
 
 on:
-    push:
-        branches:
-            - '*' # Monitora todas as branches; ajusta o padrão se necessário (ex.: 'luisfelix/issueX')
+  push:
+    branches:
+      - '*'  # Monitora todas as branches (exceto tags)
 
 jobs:
-    create-pr:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout do respositório
-              uses: actions/checkout@v3
-            - name: Criar Pull Request
-              uses: actions/github-script@v3
-              with:
-                script: |
-                    // obtem o nome da branch a partir da referência
-                    const branch = process.env.GITHUB_REF.split('/').pop();
+  create-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v3
 
-                    // Garante que estamos lidando com uma branch e não uma tag
-                    if (!ref.startsWith("refs/heads/")) {
-                      console.log("Este push não foi para uma branch. PR não será criado.");
-                      return;
-                    }
-                    // Se o push for na branch "main", ou em outra base, não cria o PR
-                    if (branch === 'main') {
-                        console.log("Push na branch 'main'; PR não será criado.")
-                        return;
-                    }
-                    // Extrai o nome da branch
-                    const branch = ref.replace(""refs/heads/", """);
-                    console.log(`Branch detectada => ${branch}`);
-                    
-                    // Define a branch base do PR
-                    const baseBranch = "v1"
-                    if (branch === baseBranch) {
-                        console.log(`Push na branch '${baseBranch}', PR não será criado.`);
-                        return;
-                    }
+      - name: Criar Pull Request automaticamente
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const github = require('@actions/github');
+            const context = github.context; // 💡 Certifica-se de que 'context' está acessível
 
-                    // Verifica se já existe um PR aberto para essa branch
-                    const {data: prs} = await github.rest.pulls.list({
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        head: `${context.repo.owner}:${branch}`
-                    });
+            // Obtém a referência do evento
+            const ref = process.env.GITHUB_REF;
+            console.log(`Referência do push: ${ref}`);
 
-                    if (existingPRs.length > 0) {
-                        console.log(`Já existe um PR aberto para a branch '${branch}'.`);
-                        return;
-                    }
-                    
-                    // Criando um novo Pull Request
-                    const { data: pr } = await github.rest.pulls.create({
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        head: branch,
-                        base: baseBranch,
-                        title: `Auto PR: ${branch} → ${baseBranch}`,
-                        body: `Este PR foi criado automaticamente a partir de um push para a branch \`${branch}\`.`
-                    });
+            // Garante que estamos lidando com uma branch e não uma tag
+            if (!ref.startsWith("refs/heads/")) {
+              console.log("Este push não foi para uma branch. PR não será criado.");
+              return;
+            }
 
-                    console.log(`✅ PR criado com sucesso: ${pr.html_url}`);
+            // Extrai o nome da branch
+            const branch = ref.replace("refs/heads/", "");
+            console.log(`Branch detectada: ${branch}`);
+
+            // Define a branch base do PR (altere se necessário)
+            const baseBranch = "v1";
+            if (branch === baseBranch) {
+              console.log(`Push na branch '${baseBranch}', PR não será criado.`);
+              return;
+            }
+
+            // Verifica se já existe um PR aberto para essa branch
+            const existingPRs = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${branch}`, // 🔹 Removendo `${context.repo.owner}:` para evitar conflitos
+              base: baseBranch,
+              state: "open"
+            });
+
+            if (existingPRs.data.length > 0) {
+              console.log(`Já existe um PR aberto para a branch '${branch}'.`);
+              return;
+            }
+
+            // Criando um novo Pull Request
+            const pr = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: branch,
+              base: baseBranch,
+              title: `Auto PR: ${branch} → ${baseBranch}`,
+              body: `Este PR foi criado automaticamente a partir de um push para a branch \`${branch}\`.`
+            });
+
+            console.log(`✅ PR criado com sucesso: ${pr.data.html_url}`);
