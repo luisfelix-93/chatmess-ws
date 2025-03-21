@@ -17,7 +17,7 @@ export class SocketManager {
     }
 
     private  registerEventHandlers(socket: Socket): void {
-        console.log("Novo usuário conectado");
+        console.log(`Novo usupario conectado: ${socket.id}`);
         socket.on("joinRoom", async (username: string, room: string) => {
             await this.handleJoinRoom(socket, username, room);
         });

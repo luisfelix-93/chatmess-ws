@@ -16,9 +16,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const github = require('@actions/github');
-            const context = github.context; // 💡 Certifica-se de que 'context' está acessível
-
+            
             // Obtém a referência do evento
             const ref = process.env.GITHUB_REF;
             console.log(`Referência do push: ${ref}`);
@@ -34,7 +32,7 @@ jobs:
             console.log(`Branch detectada: ${branch}`);
 
             // Define a branch base do PR (altere se necessário)
-            const baseBranch = "v1";
+            const baseBranch = "main";
             if (branch === baseBranch) {
               console.log(`Push na branch '${baseBranch}', PR não será criado.`);
               return;

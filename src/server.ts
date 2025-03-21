@@ -28,7 +28,7 @@ class App {
                 methods: ['GET', 'POST']
             }
         });
-        this.port = process.env.PORT || 3000;
+        this.port = process.env.PORT || 3001;
         this.redisClient = this.configureRedis();
         this.configureMiddleware();
         this.configureStaticFiles();
